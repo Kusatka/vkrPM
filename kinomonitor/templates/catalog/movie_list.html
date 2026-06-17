@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h3 mb-4">Афиша</h1>
+
+<form class="row g-2 mb-4"
+      hx-get="{% url 'catalog:movie_list' %}" hx-target="#movie-table" hx-trigger="change, submit"
+      action="{% url 'catalog:movie_list' %}" method="get">
+  <div class="col-auto">
+    <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Название фильма">
+  </div>
+  <div class="col-auto form-check align-self-center ms-2">
+    <input class="form-check-input" type="checkbox" name="original" value="1"
+           id="orig" {% if only_original %}checked{% endif %}>
+    <label class="form-check-label" for="orig">Только в оригинале</label>
+  </div>
+  <div class="col-auto form-check align-self-center ms-2">
+    <input class="form-check-input" type="checkbox" name="special" value="1"
+           id="spec" {% if show_special %}checked{% endif %}>
+    <label class="form-check-label" for="spec">Спецпоказы</label>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary">Найти</button>
+  </div>
+</form>
+
+<div id="movie-table">
+  {% include "catalog/_movie_table.html" %}
+</div>
+{% endblock %}
