@@ -122,3 +122,6 @@ SCRAPER_USER_AGENT = env(
     "SCRAPER_USER_AGENT",
     default="KinoMonitorBot/0.1 (uchebnyi proekt tsifrovoi kafedry)",
 )
+# Пауза между HTTP-запросами парсера, секунды: не выглядеть ботом и не словить
+# блокировку при последовательном опросе многих кинотеатров.
+SCRAPER_DELAY_SECONDS = env.float("SCRAPER_DELAY_SECONDS", default=1.0)

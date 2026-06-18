@@ -12,13 +12,14 @@
 import re
 from datetime import datetime, time, timedelta
 from decimal import Decimal
+from time import sleep
 
 import httpx
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.utils import timezone
 
-from .base import BaseParser, SessionDTO
+from .base import BaseParser, ParserBlocked, SessionDTO
 
 SCHEDULE_URL = "https://mos-kino.ru/schedule/?date={date}"
 
@@ -65,6 +66,7 @@ class MoskinoParser(BaseParser):
     def fetch_sessions(self) -> list[SessionDTO]:
         result = []
         days = getattr(settings, "SCRAPE_DAYS_AHEAD", 3)
+        delay = getattr(settings, "SCRAPER_DELAY_SECONDS", 1.0)
         with httpx.Client(
             headers={"User-Agent": settings.SCRAPER_USER_AGENT},
             timeout=15,
@@ -73,6 +75,9 @@ class MoskinoParser(BaseParser):
             for offset in range(1, days + 1):
                 day = timezone.localdate() + timedelta(days=offset)
                 resp = client.get(SCHEDULE_URL.format(date=day.isoformat()))
+                if resp.status_code in (403, 429, 503):
+                    raise ParserBlocked(f"moskino: HTTP {resp.status_code}")
+                sleep(delay)
                 if resp.status_code != 200:
                     continue
                 result += self.parse_schedule(resp.text, day)

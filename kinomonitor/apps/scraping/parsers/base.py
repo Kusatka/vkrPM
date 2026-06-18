@@ -11,6 +11,12 @@ from datetime import datetime
 from decimal import Decimal
 
 
+class ParserBlocked(Exception):
+    """Источник ответил кодом блокировки (403/429/503). Поднимаем исключение,
+    чтобы прогон попал в журнал как ошибка и сработал повтор, а не молчаливый
+    «успех с 0 сеансов»."""
+
+
 @dataclass
 class SessionDTO:
     """Нормализованный сеанс из любого источника."""

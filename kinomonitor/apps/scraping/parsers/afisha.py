@@ -14,13 +14,14 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 from decimal import Decimal
+from time import sleep
 
 import httpx
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.utils import timezone
 
-from .base import BaseParser, SessionDTO
+from .base import BaseParser, ParserBlocked, SessionDTO
 
 
 @dataclass(frozen=True)
@@ -73,6 +74,7 @@ class AfishaParser(BaseParser):
     def fetch_sessions(self) -> list[SessionDTO]:
         result = []
         days = getattr(settings, "SCRAPE_DAYS_AHEAD", 3)
+        delay = getattr(settings, "SCRAPER_DELAY_SECONDS", 1.0)
         with httpx.Client(
             headers={"User-Agent": settings.SCRAPER_USER_AGENT},
             timeout=15,
@@ -85,6 +87,11 @@ class AfishaParser(BaseParser):
                         afisha_slug=cinema.afisha_slug, date=day.strftime("%d-%m-%Y")
                     )
                     resp = client.get(url)
+                    if resp.status_code in (403, 429, 503):
+                        raise ParserBlocked(
+                            f"afisha {cinema.afisha_slug}: HTTP {resp.status_code}"
+                        )
+                    sleep(delay)
                     if resp.status_code != 200:
                         continue
                     result += self.parse_day(resp.text, cinema, day)

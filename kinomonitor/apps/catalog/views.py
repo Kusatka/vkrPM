@@ -1,25 +1,47 @@
-from django.db.models import Min
+from django.db.models import Min, OuterRef, Subquery
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
 from .analytics import price_trend
-from .models import Movie, PriceSnapshot
+from .models import Movie, PriceSnapshot, Session
 
 
 def movie_list(request):
     """Афиша: фильмы с предстоящими сеансами, фильтры по названию и «в оригинале»."""
+    now = timezone.now()
     q = request.GET.get("q", "").strip()
     only_original = request.GET.get("original") == "1"
     show_special = request.GET.get("special") == "1"
 
-    movies = Movie.objects.filter(sessions__starts_at__gte=timezone.now())
+    movies = Movie.objects.filter(sessions__starts_at__gte=now)
     if not show_special:
         movies = movies.filter(is_special=False)
     if only_original:
         movies = movies.filter(sessions__original_language=True)
     if q:
         movies = movies.filter(title__icontains=q)
-    movies = movies.distinct().annotate(min_price=Min("sessions__prices__price_min"))
+    movies = list(movies.distinct())
+
+    # «Цена от» = минимум по ПОСЛЕДНИМ снимкам будущих сеансов. Старый код брал
+    # Min по всей истории снимков и показывал устаревший исторический минимум,
+    # которого уже не купить. Здесь для каждого сеанса берём актуальную цену
+    # (последний снимок), и только потом минимум по фильму.
+    latest_price = (
+        PriceSnapshot.objects.filter(session=OuterRef("pk"))
+        .order_by("-collected_at")
+        .values("price_min")[:1]
+    )
+    upcoming = Session.objects.filter(starts_at__gte=now, movie_id__in=[m.id for m in movies])
+    if only_original:
+        upcoming = upcoming.filter(original_language=True)
+    price_rows = (
+        upcoming.annotate(current_price=Subquery(latest_price))
+        .values("movie_id")
+        .annotate(min_price=Min("current_price"))
+    )
+    price_by_movie = {row["movie_id"]: row["min_price"] for row in price_rows}
+    for movie in movies:
+        movie.min_price = price_by_movie.get(movie.id)
 
     if request.headers.get("HX-Request"):
         template = "catalog/_movie_table.html"

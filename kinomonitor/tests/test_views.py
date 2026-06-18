@@ -106,3 +106,23 @@ def test_pages_render(client, session):
     resp = client.get(f"/movie/{session.movie_id}/")
     assert resp.status_code == 200
     assert "Иллюзион".encode() in resp.content
+
+
+@pytest.mark.django_db
+def test_movie_list_shows_current_not_historical_min(client):
+    """«Цена от» = актуальная цена, а не исторический минимум по всем снимкам (фикс №1)."""
+    cinema = Cinema.objects.create(slug="cur", name="Курская")
+    movie = Movie.objects.create(title="Тестовый фильм", year=2026)
+    s = Session.objects.create(
+        cinema=cinema, movie=movie, starts_at=timezone.now() + timedelta(days=1)
+    )
+    # неделю назад было 200, сейчас 450 — показать должны 450
+    old = PriceSnapshot.objects.create(session=s, price_min=Decimal("200"))
+    PriceSnapshot.objects.filter(pk=old.pk).update(
+        collected_at=timezone.now() - timedelta(days=7)
+    )
+    PriceSnapshot.objects.create(session=s, price_min=Decimal("450"))
+
+    page = client.get("/").content.decode()
+    assert "450 руб." in page
+    assert "200 руб." not in page

@@ -27,7 +27,15 @@ def run_parser(self, slug: str) -> int:
     try:
         dtos = get_parser(slug)().fetch_sessions()
         run.sessions_found = services.save_sessions(dtos)
-        run.status = ScrapeRun.Status.SUCCESS
+        if run.sessions_found == 0:
+            # 0 сеансов по всем кинотеатрам и дням — почти наверняка смена вёрстки
+            # источника или блокировка, а не реальное отсутствие сеансов.
+            run.status = ScrapeRun.Status.ERROR
+            run.error = (
+                "Получено 0 сеансов: вероятна смена вёрстки источника или блокировка."
+            )
+        else:
+            run.status = ScrapeRun.Status.SUCCESS
     except Exception as exc:
         run.status = ScrapeRun.Status.ERROR
         run.error = repr(exc)
