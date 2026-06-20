@@ -6,3 +6,5 @@ __pycache__/
 staticfiles/
 test_db.sqlite3
 .env
+docs/
+test.sqlite3
