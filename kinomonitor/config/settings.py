@@ -1,4 +1,4 @@
-"""Настройки проекта КиноМонитор."""
+"""Настройки проекта Вотчер."""
 
 from pathlib import Path
 
@@ -120,7 +120,7 @@ TELEGRAM_BOT_USERNAME = env("TELEGRAM_BOT_USERNAME", default="")
 SCRAPE_DAYS_AHEAD = env.int("SCRAPE_DAYS_AHEAD", default=3)
 SCRAPER_USER_AGENT = env(
     "SCRAPER_USER_AGENT",
-    default="KinoMonitorBot/0.1 (uchebnyi proekt tsifrovoi kafedry)",
+    default="WatcherBot/0.1 (uchebnyi proekt tsifrovoi kafedry)",
 )
 # Пауза между HTTP-запросами парсера, секунды: не выглядеть ботом и не словить
 # блокировку при последовательном опросе многих кинотеатров.

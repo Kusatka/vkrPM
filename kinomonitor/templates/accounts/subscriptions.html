@@ -1,56 +1,52 @@
 {% extends "base.html" %}
 
-{% block title %}Мои подписки — КиноМонитор{% endblock %}
+{% block title %}Мои подписки — Вотчер{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">Мои подписки</h1>
+<h1 style="font-size:2.2rem;margin-bottom:1rem">Мои подписки</h1>
 
-<div class="card card-body shadow-sm mb-4">
+<div class="card card-body" style="margin-bottom:1.3rem">
   {% if telegram_linked %}
-    <span class="text-success">Telegram привязан — уведомления приходят в бот.</span>
+    <span style="color:var(--olive);font-weight:700">Telegram привязан — уведомления приходят в бот.</span>
   {% elif telegram_link %}
-    <div class="d-flex align-items-center gap-3 flex-wrap">
-      <a class="btn btn-primary" href="{{ telegram_link }}" target="_blank" rel="noopener">
-        Привязать Telegram</a>
-      <span class="text-muted small">Откроется бот — нажмите Start, привязка произойдёт
-        автоматически в течение минуты.</span>
+    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+      <a class="neu-btn" href="{{ telegram_link }}" target="_blank" rel="noopener">Привязать Telegram</a>
+      <span class="muted" style="font-size:.8rem">Откроется бот — нажмите Start, привязка произойдёт автоматически в течение минуты.</span>
     </div>
   {% else %}
-    <span class="text-muted">Telegram-бот не настроен (нет TELEGRAM_BOT_USERNAME в .env);
-      можно указать chat id вручную в форме подписки.</span>
+    <span class="muted">Telegram-бот не настроен (нет TELEGRAM_BOT_USERNAME в .env); chat id можно указать вручную в форме подписки.</span>
   {% endif %}
 </div>
 
 <div class="row">
-  <div class="col-md-7">
-    <table class="table bg-white shadow-sm">
+  <div class="col-md-7 mb-3">
+    <table class="table">
       <thead><tr><th>Фильм</th><th>Кинотеатр</th><th>Порог</th><th></th></tr></thead>
       <tbody>
         {% for sub in subscriptions %}
         <tr>
           <td>{{ sub.movie|default:"любой" }}</td>
           <td>{{ sub.cinema|default:"любой" }}</td>
-          <td>{{ sub.max_price|floatformat:0 }} руб.</td>
+          <td><span class="price" style="font-size:1rem">{{ sub.max_price|floatformat:0 }} руб.</span></td>
           <td>
             <form method="post" action="{% url 'accounts:subscription_delete' sub.pk %}">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-outline-danger">Удалить</button>
+              {% csrf_token %}<button class="neu-btn sm">Удалить</button>
             </form>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="text-muted">Подписок пока нет</td></tr>
+        <tr><td colspan="4" class="muted">Подписок пока нет</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   <div class="col-md-5">
-    <form method="post" class="card card-body shadow-sm">
+    <form method="post" class="card card-body">
       {% csrf_token %}
-      <h2 class="h5">Новая подписка</h2>
+      <h2 style="font-size:1.2rem;margin-bottom:.6rem">Новая подписка</h2>
       {{ form.as_div }}
-      <p class="text-muted small mt-2">Chat id заполнять не нужно, если Telegram привязан.</p>
-      <button class="btn btn-primary mt-1">Следить за ценой</button>
+      <p class="muted" style="font-size:.78rem;margin-top:.5rem">Chat id заполнять не нужно, если Telegram привязан.</p>
+      <button class="neu-btn" style="margin-top:.3rem">Следить за ценой</button>
     </form>
   </div>
 </div>

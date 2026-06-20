@@ -137,6 +137,10 @@ class AfishaParser(BaseParser):
 
     def _parse_block(self, block, title, cinema: AfishaCinema, day) -> list[SessionDTO]:
         tokens = [t.strip() for t in block.stripped_strings if t.strip()]
+        # Ссылка на покупку: страница «кинотеатр + дата» (где и продаются билеты).
+        ticket_url = DAY_URL.format(
+            afisha_slug=cinema.afisha_slug, date=day.strftime("%d-%m-%Y")
+        )
         year = None
         for t in tokens[:8]:  # «2026, Биография» идёт сразу после названия
             m = YEAR_RE.search(t)
@@ -179,6 +183,7 @@ class AfishaParser(BaseParser):
                         price_min=price,
                         format=fmt,
                         original_language=original,
+                        url=ticket_url,
                     )
                 )
                 price = None  # цена относится к одному сеансу

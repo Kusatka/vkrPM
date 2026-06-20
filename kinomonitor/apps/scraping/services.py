@@ -36,13 +36,19 @@ def save_sessions(dtos: list[SessionDTO]) -> int:
                 "is_special": is_special_title(dto.movie_title),
             },
         )
-        session, _ = Session.objects.get_or_create(
+        session, created = Session.objects.get_or_create(
             cinema=cinema,
             movie=movie,
             starts_at=dto.starts_at,
             format=dto.format,
-            defaults={"original_language": dto.original_language, "hall": dto.hall},
+            defaults={
+                "original_language": dto.original_language,
+                "hall": dto.hall,
+                "url": dto.url,
+            },
         )
+        if not created and dto.url and session.url != dto.url:
+            Session.objects.filter(pk=session.pk).update(url=dto.url)  # обновить ссылку
         processed += 1
         if dto.price_min is None:
             continue

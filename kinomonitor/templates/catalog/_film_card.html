@@ -1,0 +1,18 @@
+<a class="film-card" href="{% url 'catalog:movie_detail' movie.pk %}">
+  <div class="poster" style="background:{{ movie.poster_color }}">
+    <span class="filmstrip"></span>
+    {% if movie.year %}<span class="pyear">{{ movie.year }}</span>{% endif %}
+    <span class="ptitle">{{ movie.title }}</span>
+  </div>
+  <div class="film-meta">
+    {% if movie.original_title %}<span class="film-orig">{{ movie.original_title }}</span>{% endif %}
+    <div>
+      <div class="label">цена от</div>
+      <span class="price">{% if movie.min_price %}{{ movie.min_price|floatformat:0 }} руб.{% else %}—{% endif %}</span>
+    </div>
+    <div class="badges">
+      {% if movie.has_original %}<span class="tag tag-orig">в оригинале</span>{% endif %}
+      {% if movie.is_special %}<span class="tag tag-special">спецпоказ</span>{% endif %}
+    </div>
+  </div>
+</a>

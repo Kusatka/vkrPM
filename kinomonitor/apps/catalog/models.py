@@ -101,6 +101,12 @@ class Session(models.Model):
     )
     original_language = models.BooleanField("На языке оригинала", default=False)
     hall = models.CharField("Зал", max_length=100, blank=True)
+    url = models.URLField(
+        "Ссылка на сеанс",
+        max_length=500,
+        blank=True,
+        help_text="Страница источника, где можно купить билет на этот сеанс",
+    )
 
     class Meta:
         verbose_name = "Сеанс"

@@ -34,6 +34,7 @@ class SessionDTO:
     hall: str = ""
     cinema_network: str = ""
     cinema_is_niche: bool = False
+    url: str = ""  # страница источника для покупки билета на сеанс
 
 
 _REGISTRY: dict[str, type["BaseParser"]] = {}

@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 
+{% block title %}Вход — Вотчер{% endblock %}
+
 {% block content %}
-<div class="col-md-4 mx-auto">
-  <h1 class="h4 mb-3">Вход</h1>
-  <form method="post" class="card card-body shadow-sm">
+<div style="max-width:430px;margin:1rem auto">
+  <h1 style="font-size:2rem;margin-bottom:1rem">Вход</h1>
+  <form method="post" class="card card-body">
     {% csrf_token %}
     {{ form.as_div }}
-    <button class="btn btn-primary mt-3">Войти</button>
+    <button class="neu-btn" style="margin-top:1rem">Войти</button>
   </form>
+  <p class="muted" style="margin-top:1rem">Нет аккаунта? <a href="{% url 'accounts:register' %}">Регистрация</a></p>
 </div>
 {% endblock %}

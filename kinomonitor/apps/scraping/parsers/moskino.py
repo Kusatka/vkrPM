@@ -100,6 +100,9 @@ class MoskinoParser(BaseParser):
     def parse_schedule(self, html: str, day) -> list[SessionDTO]:
         soup = BeautifulSoup(html, "lxml")
         known = self._cinema_map()
+        # У Москино сеанс — JS-вызов (не URL). Ведём на расписание нужной даты,
+        # где этот сеанс кликабелен для покупки.
+        day_url = SCHEDULE_URL.format(date=day.isoformat())
         result = []
         for a in soup.find_all("a", href=SESSION_HREF):
             m = SESSION_TEXT.match(a.get_text(" ", strip=True))
@@ -127,6 +130,7 @@ class MoskinoParser(BaseParser):
                     price_max=price,
                     format=m["fmt"] or "2D",
                     original_language=bool(m["sub"]),
+                    url=day_url,
                 )
             )
         return result

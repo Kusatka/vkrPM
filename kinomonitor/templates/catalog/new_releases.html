@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Новинки — Вотчер{% endblock %}
+
+{% block content %}
+<h1 style="font-size:2.3rem;margin-bottom:.4rem">Новинки</h1>
+<p class="muted" style="margin-bottom:.5rem">Свежие релизы с предстоящими сеансами — новые сверху.</p>
+
+{% if movies %}
+<div class="film-grid">
+  {% for movie in movies %}{% include "catalog/_film_card.html" %}{% endfor %}
+</div>
+{% else %}
+<p class="muted" style="padding:1.5rem 0">Пока пусто — запустите сбор данных (см. README).</p>
+{% endif %}
+{% endblock %}
