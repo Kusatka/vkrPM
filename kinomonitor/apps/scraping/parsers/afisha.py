@@ -21,7 +21,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.utils import timezone
 
-from .base import BaseParser, ParserBlocked, SessionDTO
+from .base import BaseParser, ParserBlocked, SessionDTO, http_get
 
 
 @dataclass(frozen=True)
@@ -81,12 +81,12 @@ class AfishaParser(BaseParser):
             follow_redirects=True,
         ) as client:
             for cinema in monitored_cinemas():
-                for offset in range(1, days + 1):
+                for offset in range(0, days):
                     day = timezone.localdate() + timedelta(days=offset)
                     url = DAY_URL.format(
                         afisha_slug=cinema.afisha_slug, date=day.strftime("%d-%m-%Y")
                     )
-                    resp = client.get(url)
+                    resp = http_get(client, url)
                     if resp.status_code in (403, 429, 503):
                         raise ParserBlocked(
                             f"afisha {cinema.afisha_slug}: HTTP {resp.status_code}"
@@ -184,6 +184,7 @@ class AfishaParser(BaseParser):
                         format=fmt,
                         original_language=original,
                         url=ticket_url,
+                        source=self.source_slug,
                     )
                 )
                 price = None  # цена относится к одному сеансу

@@ -37,7 +37,7 @@
   <tbody>
     {% for s in upcoming %}
     <tr>
-      <td>{{ s.cinema.name }}{% if s.original_language %} <span class="tag tag-orig">оригинал</span>{% endif %}</td>
+      <td>{{ s.cinema.name }}{% if s.original_language %} <span class="tag tag-orig">оригинал</span>{% endif %}{% if s.source == "demo" %} <span class="tag tag-special">демо</span>{% endif %}</td>
       <td>{{ s.starts_at|date:"d.m H:i" }}</td>
       <td>{{ s.get_format_display }}</td>
       <td><span class="price" style="font-size:1rem">{% if s.latest_price %}{{ s.latest_price.price_min|floatformat:0 }} руб.{% else %}—{% endif %}</span></td>

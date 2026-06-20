@@ -5,16 +5,32 @@
 добавление нового источника не требует изменений в ядре.
 """
 
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+
+import httpx
 
 
 class ParserBlocked(Exception):
     """Источник ответил кодом блокировки (403/429/503). Поднимаем исключение,
     чтобы прогон попал в журнал как ошибка и сработал повтор, а не молчаливый
     «успех с 0 сеансов»."""
+
+
+def http_get(client, url, retries=2, pause=2.0):
+    """GET с повтором на обрывах соединения (например, WinError 10054 — сброс
+    соединения удалённым сервером). Коды блокировки 403/429/503 сюда не
+    относятся: их обрабатывает сам парсер по статусу ответа."""
+    for attempt in range(retries + 1):
+        try:
+            return client.get(url)
+        except httpx.HTTPError:
+            if attempt >= retries:
+                raise
+            time.sleep(pause)
 
 
 @dataclass
@@ -35,6 +51,7 @@ class SessionDTO:
     cinema_network: str = ""
     cinema_is_niche: bool = False
     url: str = ""  # страница источника для покупки билета на сеанс
+    source: str = ""  # afisha / moskino / demo — кто создал запись
 
 
 _REGISTRY: dict[str, type["BaseParser"]] = {}

@@ -22,8 +22,8 @@ class MovieAdmin(admin.ModelAdmin):
 
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
-    list_display = ["movie", "cinema", "starts_at", "format", "original_language"]
-    list_filter = ["cinema", "format", "original_language"]
+    list_display = ["movie", "cinema", "starts_at", "format", "original_language", "source"]
+    list_filter = ["source", "cinema", "format", "original_language"]
     date_hierarchy = "starts_at"
 
 

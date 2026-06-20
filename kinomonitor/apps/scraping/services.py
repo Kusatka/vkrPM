@@ -45,10 +45,16 @@ def save_sessions(dtos: list[SessionDTO]) -> int:
                 "original_language": dto.original_language,
                 "hall": dto.hall,
                 "url": dto.url,
+                "source": dto.source,
             },
         )
-        if not created and dto.url and session.url != dto.url:
-            Session.objects.filter(pk=session.pk).update(url=dto.url)  # обновить ссылку
+        updates = {}
+        if dto.url and session.url != dto.url:
+            updates["url"] = dto.url
+        if dto.source and session.source != dto.source:
+            updates["source"] = dto.source
+        if not created and updates:
+            Session.objects.filter(pk=session.pk).update(**updates)
         processed += 1
         if dto.price_min is None:
             continue

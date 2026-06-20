@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.utils import timezone
 
-from .base import BaseParser, ParserBlocked, SessionDTO
+from .base import BaseParser, ParserBlocked, SessionDTO, http_get
 
 SCHEDULE_URL = "https://mos-kino.ru/schedule/?date={date}"
 
@@ -72,9 +72,9 @@ class MoskinoParser(BaseParser):
             timeout=15,
             follow_redirects=True,
         ) as client:
-            for offset in range(1, days + 1):
+            for offset in range(0, days):
                 day = timezone.localdate() + timedelta(days=offset)
-                resp = client.get(SCHEDULE_URL.format(date=day.isoformat()))
+                resp = http_get(client, SCHEDULE_URL.format(date=day.isoformat()))
                 if resp.status_code in (403, 429, 503):
                     raise ParserBlocked(f"moskino: HTTP {resp.status_code}")
                 sleep(delay)
@@ -131,6 +131,7 @@ class MoskinoParser(BaseParser):
                     format=m["fmt"] or "2D",
                     original_language=bool(m["sub"]),
                     url=day_url,
+                    source=self.source_slug,
                 )
             )
         return result

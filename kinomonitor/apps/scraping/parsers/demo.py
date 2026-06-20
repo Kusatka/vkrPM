@@ -59,6 +59,7 @@ class DemoParser(BaseParser):
                             price_min=price,
                             price_max=price + Decimal("200"),
                             original_language=in_original and niche,
+                            source=self.source_slug,
                         )
                     )
         return result

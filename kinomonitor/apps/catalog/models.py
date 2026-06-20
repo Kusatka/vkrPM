@@ -107,6 +107,14 @@ class Session(models.Model):
         blank=True,
         help_text="Страница источника, где можно купить билет на этот сеанс",
     )
+    source = models.CharField(
+        "Источник",
+        max_length=20,
+        blank=True,
+        db_index=True,
+        choices=[("afisha", "Афиша"), ("moskino", "Москино"), ("demo", "Демо")],
+        help_text="Откуда данные: парсер Афиши, Москино или демо-генератор",
+    )
 
     class Meta:
         verbose_name = "Сеанс"
